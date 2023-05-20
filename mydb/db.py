@@ -27,17 +27,16 @@ class Database:
 
     def connect(self):
         """ Connect to the PostgreSQL database server """
-        conn = None
         try:
             # read connection parameters
             params = self.config()
 
             # connect to the PostgreSQL server
             print('Connecting to the PostgreSQL database...')
-            conn = psycopg2.connect(**params)
+            self.conn = psycopg2.connect(**params)
 
             # create a cursor
-            cur = conn.cursor()
+            cur = self.conn.cursor()
             
             # execute a statement
             print('PostgreSQL database version:')
@@ -46,40 +45,35 @@ class Database:
             # display the PostgreSQL database server version
             db_version = cur.fetchone()
             print(db_version)
-       
+
             # close the communication with the PostgreSQL
-            cur.close()
+            # cur.close()
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
-        finally:
-            if conn is not None:
-                conn.close()
-                print('Database connection closed.')
+        # finally:
+        #     if self.conn is not None:
+        #         self.conn.close()
+        #         print('Database connection closed.')
 
-    def create_tables(self):
-        commands = (
-            """
-            CREATE TABLE ubot_A001 (
-                bot_start TIMESTAMP,
-                bot_end TIMESTAMP,
-                plant VARCHAR(255),
-                material VARCHAR(255),
-                batch VARCHAR(255),
-                inslot VARCHAR(255),
-                udcode VARCHAR(255)
-            )
-            """,
-            # Add the rest of the CREATE TABLE commands for the other tables here
+    def create_tables(self,plant):
+        command = f"""
+        CREATE TABLE ubot_{plant} (
+            bot_start TIMESTAMP,
+            bot_end TIMESTAMP,
+            plant VARCHAR(255),
+            material VARCHAR(255),
+            batch VARCHAR(255),
+            inslot VARCHAR(255),
+            udcode VARCHAR(255)
         )
+        """
 
         try:
             cur = self.conn.cursor()
-            for command in commands:
-                cur.execute(command)
-
+            cur.execute(command)
             cur.close()
             self.conn.commit()
-            print('Tables created successfully')
+            print('Table created successfully')
 
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
@@ -102,9 +96,10 @@ class Database:
 
     def insert_data(self, table, columns, values):
         cur = self.conn.cursor()
-        query = sql.SQL(f'INSERT INTO {table} ({columns}) VALUES ({values})')
-        cur.execute(query, (values,))
-
+        query = sql.SQL("INSERT INTO {} ({}) VALUES (%s, %s, %s, %s, %s, %s, %s)").format(
+            sql.Identifier(table), 
+            sql.SQL(",").join(map(sql.Identifier, columns.split(", "))))
+        cur.execute(query, values)
         self.conn.commit()
 
     def truncate_table(self, table):

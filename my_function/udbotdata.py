@@ -6,8 +6,9 @@ from linebot import LineBotApi
 from linebot.models import TextSendMessage
 
 class UDBotData:
-    def __init__(self):
-        self.db = Database()
+    def __init__(self, host, username, password, database):
+        self.db = Database(host, username, password, database)
+        
 
     def save_bot_data(self, bot_start, bot_end, plant, material, batch, inslot, udcode):
         # Convert bot_start and bot_end to string in the appropriate format
@@ -18,29 +19,34 @@ class UDBotData:
         self.db.insert_data(f'ubot_{plant}', 'bot_start, bot_end, plant, material, batch, inslot, udcode',
                             bot_start_str, bot_end_str, plant, material, batch, inslot, udcode)
 
-    def get_and_send_data(self, plant):
-        self.db.connect()
-        data = self.db.select_data(f'ubot_{plant}', bot_start='2023-01-01 00:00:00', bot_end='2023-02-01 00:00:00', plant=plant)
-        count_of_inslot = len([row for row in data if row['inslot'] == 'I1'])
-        count_of_botstart = len([row for row in data if row['bot_start'] is not None])
-        self.db.close_conn()
+    def get_and_send_data(self, type, plant, email=None):
+        try:
+            data = self.select_data(plant)
 
-        self.send_email(plant, count_of_inslot, count_of_botstart)
-        self.send_line_message(plant, count_of_inslot, count_of_botstart)
+            count_of_inslot = self.count_inslot(plant)
+            count_of_botstart = self.count_botstart(plant)
 
-    def send_email(self, plant, count_of_inslot, count_of_botstart):
+            if type == 'email':
+                self.send_email(email, data, count_of_inslot, count_of_botstart, plant)  # การส่ง email ที่ต้องการ
+            elif type == 'line':
+                self.send_line(data, count_of_inslot, count_of_botstart, plant)
+
+        except Exception as e:
+            print('Error:', e)
+
+    def send_email(self, email, data, count_of_inslot, count_of_botstart, plant):
         # Setup SMTP server and email properties
         smtp = SMTP("smtp.mailserver.com")
         msg = MIMEText(f"For plant {plant}, there were {count_of_inslot} inslots and {count_of_botstart} bot starts.")
         msg['Subject'] = 'UDBot Data Report'
         msg['From'] = 'udbot@mail.com'
-        msg['To'] = 'recipient@mail.com'
+        msg['To'] = email
 
         # Send the email
         smtp.send_message(msg)
         smtp.quit()
 
-    def send_line_message(self, plant, count_of_inslot, count_of_botstart):
+    def send_line(self, data, count_of_inslot, count_of_botstart, plant):
         # Setup Line bot API
         line_bot_api = LineBotApi('YOUR_CHANNEL_ACCESS_TOKEN')
 
