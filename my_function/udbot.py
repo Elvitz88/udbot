@@ -102,7 +102,26 @@ class SAPLoginBot:
             time.sleep(3)
             pyautogui.press("enter")
         except:
-            print('filt_multi_status error')  
+            print('filt_multi_status error')
+            
+    def inslot_data(self):
+        try:
+            pyautogui.click(x,y)
+            pyautogui.hotkey("ctrl","C")
+            material = pyperclip.paste()
+            
+            pyautogui.click(x,y)
+            pyautogui.hotkey("ctrl","C")
+            batch = pyperclip.paste()
+            
+            pyautogui.click(x,y)
+            pyautogui.hotkey("ctrl","C")
+            inslot = pyperclip.paste()
+            
+            udcode = "A"
+            return material,batch,inslot,udcode
+        except:
+            print('inslot_data error')
   
     def change_intlot_data (self):
         try:
@@ -114,8 +133,8 @@ class SAPLoginBot:
             pyautogui.hotkey("ctrl","shift","f5")
             time.sleep(3)
         except:
-            print('change_intlot_data error')  
-    
+            print('change_intlot_data error')
+            
     def ud_Char (self):
         try:
             pyautogui.click(178 , 317 )
