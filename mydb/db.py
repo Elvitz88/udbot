@@ -1,6 +1,7 @@
 import psycopg2
 from psycopg2 import sql
 from configparser import ConfigParser
+import pandas as pd
 
 class Database:
     def __init__(self):
@@ -77,10 +78,9 @@ class Database:
                 query = sql.SQL("{} WHERE {}").format(query, sql.SQL(condition_str))
             cursor.execute(query, [f"%{v}%" for v in conditions.values()])
             rows = cursor.fetchall()
-            count = len(rows)  # นับจำนวนแถวที่ได้จากการค้นหา
-            for row in rows:
-                print(row)
-            print("Number of rows:", count)
+            count = len(rows)
+            df = pd.DataFrame(rows, columns=[desc[0] for desc in cursor.description])  # สร้าง DataFrame จากแถวที่ได้
+            return df
             
             
     def update_data(self, table, set_column, set_value, conditions):

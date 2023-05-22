@@ -7,21 +7,25 @@ from configparser import ConfigParser
 
 def get_plant_user_password_email():
     config = ConfigParser()
-    config.read('plant_user.ini')
+    config.read('config.ini')
 
     plant_user_password_email = []
     for section in config.sections():
-        plant = section
-        user = config.get(section, 'user')
-        password = config.get(section, 'password')
-        email = config.get(section, 'email')  # การอ่านค่า email
-        plant_user_password_email.append([plant, user, password, email])
-    
+        if section == 'plant_user':
+            for option in config.options(section):
+                credentials = config.get(section, option).split(',')
+                if len(credentials) >= 3:
+                    plant = option
+                    user = credentials[0]
+                    password = credentials[1]
+                    email = credentials[2]
+                    plant_user_password_email.append([plant, user, password, email])
+
     return plant_user_password_email
 
 def main():
     plant_user_password_email = get_plant_user_password_email()  # การเรียกใช้ function ใหม่
-    instypes = ['04', '01', '89']
+    instypes = ['89']
     udbot_data = UDBotData()
 
     while True:  # Run indefinitely
@@ -44,10 +48,9 @@ def main():
                     udbot_data.save_bot_data(bot_start, bot_end, plant_code, material, batch, inslot, udcode)
 
             bot.close_connection()
-            udbot_data.get_and_send_data('email', plant_code, email)  # การส่ง email หลังจากปิดการเชื่อมต่อ bot
 
-        # Sleep for 5 minutes (300 seconds)
-        time.sleep(300)
+        # Sleep for 0.5 minutes (30 seconds)
+        time.sleep(30)
 
 if __name__ == "__main__":
     main()
