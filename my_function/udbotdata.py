@@ -7,43 +7,37 @@ from linebot.models import TextSendMessage
 import configparser
 from mydb.db import Database
 
+# db = Database()
+
 class UDBotData:
     def __init__(self):
-        # Read configuration file
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        
-        # Get PostgreSQL credentials
-        host = config.get('postgresql', 'host')
-        database = config.get('postgresql', 'database')
-        user = config.get('postgresql', 'user')
-        password = config.get('postgresql', 'password')
-        port = config.get('postgresql', 'port')
-        
-        # Perform the database connection using the credentials
-        self.db = Database(host, user, password, database, port)
-        
+        self.db = Database()
 
     def save_bot_data(self, bot_start, bot_end, plant, material, batch, inslot, udcode):
-        # Convert bot_start and bot_end to string in the appropriate format
         bot_start_str = bot_start.strftime("%Y-%m-%d %H:%M:%S")
         bot_end_str = bot_end.strftime("%Y-%m-%d %H:%M:%S")
 
         # Insert data to the corresponding plant table
-        self.db.insert_data(f'ubot_{plant}', 'bot_start, bot_end, plant, material, batch, inslot, udcode',
-                            bot_start_str, bot_end_str, plant, material, batch, inslot, udcode)
+        self.db.insert_data(f'ubot_{plant}','bot_start, bot_end, plant, material, batch, inslot, udcode',[bot_start_str, bot_end_str, plant, material, batch, inslot, udcode])
 
-    def get_and_send_data(self, type, plant, email=None):
+    def get_and_send_data(self,plant):
         try:
-            data = self.db.select_data(plant)
+            # Define the table and conditions for the select_data function
+            table = f'ubot_{plant}'  # replace with your table name
+            bot_start = datetime.datetime.now() - datetime.timedelta(hours=)
+            bot_start = bot_start.strftime("%Y-%m-%d %H:00:00")
+            bot_end = datetime.datetime.now()
+            bot_end = bot_end.strftime("%Y-%m-%d %H:00:00")
+            conditions = {
+                "bot_start": bot_start
+            }
+            # Call the select_data function
+            data_rows = self.db.select_data(table, conditions)
 
-            count_of_inslot = self.db.count_inslot(plant)
-            count_of_botstart = self.db.count_botstart(plant)
+            # Count the number of rows returned by the select_data function
+            inslot_count = len(data_rows)
 
-            if type == 'email':
-                self.send_email(email, data, count_of_inslot, count_of_botstart, plant)
-            elif type == 'line':
-                self.send_line(data, count_of_inslot, count_of_botstart, plant)
+            return plant, inslot_count, bot_start, bot_end
 
         except Exception as e:
             print('Error:', e)
