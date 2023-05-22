@@ -3,61 +3,44 @@ from psycopg2 import sql
 from configparser import ConfigParser
 
 class Database:
-
     def __init__(self):
-        self.conn = None
-
-    @staticmethod
-    def config(filename='config.ini', section='postgresql'):
-        # create a parser
-        parser = ConfigParser()
-        # read config file
-        parser.read(filename)
-
-        # get section, default to postgresql
-        db = {}
-        if parser.has_section(section):
-            params = parser.items(section)
-            for param in params:
-                db[param[0]] = param[1]
-        else:
-            raise Exception('Section {0} not found in the {1} file'.format(section, filename))
-
-        return db
+        self.connection = None
+        self.load_config()
+        
+    def load_config(self):
+        config = ConfigParser()
+        config.read('config.ini')
+        self.host = config.get('postgresql', 'host')
+        self.user = config.get('postgresql', 'user')
+        self.password = config.get('postgresql', 'password')
+        self.database = config.get('postgresql', 'database')
+        self.port = config.get('postgresql', 'port')
 
     def connect(self):
-        """ Connect to the PostgreSQL database server """
         try:
-            # read connection parameters
-            params = self.config()
+            self.connection = psycopg2.connect(
+                host=self.host,
+                user=self.user,
+                password=self.password,
+                database=self.database,
+                port=self.port
+            )
+            self.connection.autocommit = True
+        except psycopg2.Error as e:
+            print("Error connecting to the database:", e)
 
-            # connect to the PostgreSQL server
-            print('Connecting to the PostgreSQL database...')
-            self.conn = psycopg2.connect(**params)
-
-            # create a cursor
-            cur = self.conn.cursor()
+    def disconnect(self):
+        if self.connection is not None:
+            self.connection.close()
             
-            # execute a statement
-            print('PostgreSQL database version:')
-            cur.execute('SELECT version()')
+    def execute_query(self, query):
+        cursor = self.connection.cursor()
+        cursor.execute(query)
+        return cursor.fetchall()
 
-            # display the PostgreSQL database server version
-            db_version = cur.fetchone()
-            print(db_version)
-
-            # close the communication with the PostgreSQL
-            # cur.close()
-        except (Exception, psycopg2.DatabaseError) as error:
-            print(error)
-        # finally:
-        #     if self.conn is not None:
-        #         self.conn.close()
-        #         print('Database connection closed.')
-
-    def create_tables(self,plant):
+    def create_tables(self, plant):
         command = f"""
-        CREATE TABLE ubot_{plant} (
+        CREATE TABLE IF NOT EXISTS ubot_{plant} (
             bot_start TIMESTAMP,
             bot_end TIMESTAMP,
             plant VARCHAR(255),
@@ -69,21 +52,21 @@ class Database:
         """
 
         try:
-            cur = self.conn.cursor()
-            cur.execute(command)
-            cur.close()
-            self.conn.commit()
+            cursor = self.connection.cursor()
+            cursor.execute(command)
+            cursor.close()
+            self.connection.commit()
             print('Table created successfully')
 
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
 
     def select_data(self, table, bot_start=None, bot_end=None, plant=None, material=None, batch=None, inslot=None):
-        cur = self.conn.cursor()
+        cursor = self.connection.cursor()
         query = sql.SQL(f'SELECT * FROM {table} WHERE bot_start=%s AND bot_end=%s AND plant=%s AND material=%s AND batch=%s AND inslot=%s')
-        cur.execute(query, (bot_start, bot_end, plant, material, batch, inslot))
+        cursor.execute(query, (bot_start, bot_end, plant, material, batch, inslot))
 
-        rows = cur.fetchall()
+        rows = cursor.fetchall()
         for row in rows:
             print(row)
 
@@ -113,3 +96,11 @@ class Database:
         if self.conn is not None:
             self.conn.close()
             print('Database connection closed.')
+            
+    def count_inslot(self, table):
+        query = f"SELECT COUNT(*) FROM {table} WHERE inslot = TRUE;"
+        return self.execute_query(query)[0][0]
+    
+    def count_botstart(self, table):
+        query = f"SELECT COUNT(*) FROM {table} WHERE bot_start IS NOT NULL;"
+        return self.execute_query(query)[0][0]
