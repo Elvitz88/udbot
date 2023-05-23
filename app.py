@@ -33,26 +33,30 @@ def main():
             plant_code, username, password, email = plant_info  # การรับค่า email
             bot = SAPLoginBot()
             bot.login(username, password)
+            bot.entry_QA32()  # เข้าสู่ระบบ QA32
 
-            for _ in range(3):  # Loop for 3 times
-                for instype in instypes:  # Loop over input types
-                    bot_start = datetime.now()  # Get current datetime at the start of the loop
-                    bot.entry_QA32()
-                    bot.information_intlot(plant_code, instype)  # Use the current plant code and input type
-                    bot.change_intlot_data()
-                    material, batch, inslot, udcode = bot.inslot_data()
-                    bot.ud_Char()
-                    bot_end = datetime.now()  # Get current datetime at the end of the loop
-                    
-                    # Store the data including bot_start and bot_end
-                    udbot_data.save_bot_data(bot_start, bot_end, plant_code, material, batch, inslot, udcode)
+            for instype in instypes:  # Loop over input types
+                bot.information_intlot(plant_code, instype)  # แสดงข้อมูลในหน้า Information from Intlot
+                bot.filt_multi_status()  # กำหนดตัวกรองสถานะหลายรายการ
 
-            bot.close_connection()
+                for _ in range(3):  # Loop for 3 times
+                    bot_start = datetime.now()  # เวลาเริ่มต้นการดำเนินการ
+                    material, batch, inslot, udcode = bot.inslot_data()  # ดึงข้อมูล InsLot
+                    if inslot == '':  # ถ้า InsLot เป็นค่าว่าง
+                        break  # ออกจากลูป for _ in range(3)
 
-        # Sleep for 0.5 minutes (30 seconds)
-        time.sleep(30)
+                    bot.entry_ud()  # เข้าสู่ระบบ UD
+                    bot.ud_Char()  # ป้อนข้อมูล UD
+
+                    bot_end = datetime.now()  # เวลาสิ้นสุดการดำเนินการ
+                    udbot_data.save_bot_data(bot_start, bot_end, plant_code, material, batch, inslot, udcode)  # บันทึกข้อมูล UD Bot
+
+            bot.close_connection()  # ปิดการเชื่อมต่อกับ SAP
+
+        time.sleep(5)  # หน่วงเวลา 5 วินาที
 
 if __name__ == "__main__":
     main()
 
 
+    
