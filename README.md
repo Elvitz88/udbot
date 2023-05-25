@@ -13,6 +13,9 @@ Clone the repository to your local machine.
 ### __Step 2: Create necessary directories__
 Navigate to the root of the project and create the following directories:
 
+    mkdir documents
+        cd documents
+        mkdir pictures
     mkdir my_function
     mkdir mydb
 
@@ -30,7 +33,7 @@ To activate the virtual environment, run:
 ### __Step 4: Install dependencies__
 Install the necessary Python dependencies by running:
 
-    pip install -r requirements.txt
+    pip install -r requirement.txt
 
 This will install all the dependencies listed in the requirements.txt file.
 
