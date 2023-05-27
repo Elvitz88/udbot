@@ -1,17 +1,16 @@
 # __udbot__
-UDBot is an automation software designed to perform Robotic Process Automation (RPA) on a specific program. The bot is built in Python and is designed to perform tasks quickly and efficiently.
+UDBot เป็นซอฟต์แวร์อัตโนมัติที่ออกแบบมาเพื่อทำ Robotic Process Automation (RPA) กับโปรแกรมเฉพาะ เราสร้างบอทด้วย Python และออกแบบมาเพื่อทำงานอย่างรวดเร็วและมีประสิทธิภาพ
 
-## __Setup Instructions__
+## __คำแนะนำในการติดตั้ง__
+ทำตามขั้นตอนด้านล่างเพื่อติดตั้งและรัน UDBot:
 
-Follow the steps below to set up and run UDBot:
-
-### __Step 1: Clone the repository__
-Clone the repository to your local machine.
+### __ขั้นตอนที่ 1: clone repository__
+clone repository ไปยังเครื่องของคุณ
 
     https://github.com/Elvitz88/udbot.git
 
-### __Step 2: Create necessary directories__
-Navigate to the root of the project and create the following directories:
+### __ขั้นตอนที่ 2: สร้างไดเรกทอรีที่จำเป็น__
+เข้าสู่ Root ของโปรเจ็คและสร้างไดเรกทอรีต่อไปนี้:
 
     mkdir documents
         cd documents
@@ -19,31 +18,31 @@ Navigate to the root of the project and create the following directories:
     mkdir my_function
     mkdir mydb
 
-These directories will store documents, custom function scripts, and databases, respectively.
+ไดเรกทอรีเหล่านี้จะเก็บเอกสาร, สคริปต์ฟังก์ชันที่กำหนดเอง, และฐานข้อมูล ตามลำดับ
 
-### __Step 3: Create a virtual environment__
-Create a Python virtual environment to isolate the project dependencies. You can do this by running the following command:
+### __ขั้นตอนที่ 3: สร้าง virtual environment__
+สร้าง virtual environment ของ Python เพื่อแยก dependencies ของโปรเจ็ค คุณสามารถทำได้โดยรันคำสั่งต่อไปนี้:
 
     python -m venv env
 
-To activate the virtual environment, run:
+ในการเปิดใช้งาน virtual environment, run:
 
     env\Scripts\activate.bat
 
-### __Step 4: Install dependencies__
-Install the necessary Python dependencies by running:
+### __ขั้นตอนที่ 4: ติดตั้ง dependencies__
+ติดตั้ง dependencies ของ Python ที่จำเป็นโดย run:
 
     pip install -r requirement.txt
 
-This will install all the dependencies listed in the requirements.txt file.
+การดำเนินการนี้จะติดตั้ง dependencies ทั้งหมดที่แสดงอยู่ในไฟล์ requirements.txt
 
-## __Running the Bot__
-After setting up, you can run UDBot by executing the main Python script (please replace main_script.py with the actual name of your script):
+## __การรัน Bot__
+หลังจากติดตั้งเสร็จสิ้น, คุณสามารถรัน UDBot โดยการ execute สคริปต์ Python หลัก (โปรดแทน main_script.py ด้วยชื่อจริงของสคริปต์ของคุณ):
 
     python main_script.py
 
-## __Contributing__
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+## __การทำงานร่วมกัน__
+ยินดีต้อนรับการส่ง pull request สำหรับการเปลี่ยนแปลงสำคัญ, โปรดเปิดปัญหาก่อนเพื่อสนทนาเกี่ยวกับสิ่งที่คุณต้องการเปลี่ยน
 
-## __License__
-UDBot is licensed under the terms of the [MIT License.](https://choosealicense.com/licenses/mit/)
+## __ใบอนุญาต__
+UDBot ได้รับใบอนุญาตภายใต้เงื่อนไขของ ใบอนุญาต [MIT](https://choosealicense.com/licenses/mit/)

@@ -110,3 +110,29 @@ class Database:
             self.connection.close()
             print('Database connection closed.')
             
+    #### user management functions        
+    def create_users_table(self):
+        command = """
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(255) NOT NULL,
+            password VARCHAR(255) NOT NULL
+        )
+        """
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute(command)
+            print("Users table created successfully")
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error creating users table:", error)
+            
+    def get_users(self):
+        query = "SELECT * FROM users"
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchall()
+                return rows
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error getting users:", error)
+            

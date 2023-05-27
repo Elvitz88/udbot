@@ -17,17 +17,20 @@ class SAPLoginBot:
     def __init__(self):
         self.udbot_data = UDBotData()
 
-        project_dir = os.path.dirname(__file__)  # gets directory where the python script is located
+        project_dir = os.getcwd()  # หรือกำหนดเส้นทางของโปรเจคโดยตรง
         picture_dir = os.path.join(project_dir, 'documents', 'pictures')  # creates the path to the 'pictures' folder
 
         self.sap_icon_logo = os.path.join(picture_dir, 'saplogo.png')
         self.systemlogin_icon = os.path.join(picture_dir, 'Systemlogin.png')
         self.statusud_icon = os.path.join(picture_dir, 'StatusUD.png')
-        self.chagelongtextud_icon = os.path.join(picture_dir, 'changelongtextUD3.png')
+        self.changelongtextud_icon = os.path.join(picture_dir, 'changelongtextUD1.png')
+        
 
-        self.username_field_location = (229, 206)
-        self.password_field_location = (214, 230)
-        self.login_button_location = (600, 600)
+        self.username_field_location = (218, 205)
+        self.password_field_location = (205, 228)
+        self.reference_position = (28, 182)
+        
+        # self.login_button_location = (600, 600)
 
     def login(self, username, password): 
         try:
@@ -41,7 +44,7 @@ class SAPLoginBot:
             center_y = max_loc[1] + image_height // 2
             pyautogui.moveTo(center_x, center_y)
             pyautogui.doubleClick()
-            safe_sleep(6)
+            safe_sleep(5)
             screenshot = pyautogui.screenshot()
             screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
             image_template = cv2.imread(self.systemlogin_icon)
@@ -52,13 +55,16 @@ class SAPLoginBot:
             center_y = max_loc[1] + image_height // 2
             pyautogui.moveTo(center_x, center_y)
             pyautogui.doubleClick()
-            safe_sleep(6)
-            pyautogui.click(self.username_field_location)
+            safe_sleep(7)
+            pyautogui.click(self.username_field_location,duration=1)
             pyautogui.write(username)
-            pyautogui.click(self.password_field_location)
+            safe_sleep(1)
+            pyautogui.click(220, 205)
+            safe_sleep(1)
+            pyautogui.click(self.password_field_location,duration=1)
             pyautogui.write(password)
             pyautogui.press("enter")
-            safe_sleep(6)
+            safe_sleep(7)
         except Exception as e:
             print('login error:', e)
 
@@ -67,7 +73,7 @@ class SAPLoginBot:
             pyautogui.click(81 , 52 )
             pyautogui.write("QA32")
             pyautogui.press("enter")
-            safe_sleep(5)
+            safe_sleep(3)
         except:
             print('login error')
 
@@ -103,7 +109,7 @@ class SAPLoginBot:
 
             #Execute
             pyautogui.hotkey("Fn","F8" )
-            safe_sleep(10)
+            safe_sleep(5)
         except:
             print('information_intlot error')
 
@@ -113,88 +119,73 @@ class SAPLoginBot:
             pyautogui.click(433, 159)
             pyautogui.hotkey("shift","f4")
             safe_sleep(3)
-            pyautogui.click(1273,753)
-            safe_sleep(3)
             pyautogui.write("INSP*")
             safe_sleep(3)
             pyautogui.press("enter")
             
         except:
             print('filt_multi_status error')
+     
+    def ud_Char (self):
+        try:
+                pyautogui.click(203,885)
+                safe_sleep(3)
+                pyautogui.write("A")
+                safe_sleep(3)
+                pyautogui.press("enter")
+                safe_sleep(3)
+                pyautogui.click(364,371 ) 
+                safe_sleep(3)
+                pyautogui.hotkey('ctrl','s')
+                safe_sleep(3)
+   
+        except Exception as e:
+            print('ud_Char error:', e)     
             
-    def check_statusud(self):
+            
+    def check_popup(self):   
+        screenshot = pyautogui.screenshot()
+        screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+        image_template = cv2.imread(self.changelongtextud_icon)
+
+        result = cv2.matchTemplate(screenshot, image_template, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, _ = cv2.minMaxLoc(result)
+
+        # If the accuracy is higher than 0.8 
+        if max_val > 0.8:
+            safe_sleep(5)
+            pyautogui.click(267, 53, duration=1)
+            return True
+        else:
+            # If the template image is not found in the screenshot, stop the function
+            return False
+        
+    # Function สำหรับ วน loop ขยับแถวลง แล้วทำงาน ตาม Fucntion            
+    def check_statusud(self,plant_code):
         pyautogui.click(388,318)
-        safe_sleep(5)
+        safe_sleep(3)
         screenshot = pyautogui.screenshot()
         screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
         image_template = cv2.imread(self.statusud_icon)
 
         result = cv2.matchTemplate(screenshot, image_template, cv2.TM_CCOEFF_NORMED)
         _, max_val, _, max_loc = cv2.minMaxLoc(result)
-
         # ถ้ามีความแม่นยำมากกว่า 0.10 (สามารถปรับตัวเลขนี้ได้ตามความต้องการ)
         if max_val > 0.8:
             image_height, image_width, _ = image_template.shape
             center_x = max_loc[0] + image_width // 2
             center_y = max_loc[1] + image_height // 2
-            safe_sleep(5)
+            safe_sleep(6)
             pyautogui.moveTo(center_x, center_y)
             pyautogui.click(188,314)
+            self.ud_Char()
+            self.check_popup()     
         else:
             # ถ้าไม่พบภาพ template ใน screenshot, คลิกที่ตำแหน่งอื่น
             pyautogui.hotkey("F3")
             return False
         return True
-   
-    def ud_Char (self):
-        try:
-                pyautogui.click(205 , 909 )
-                safe_sleep(5)
-                pyautogui.write("A")
-                safe_sleep(5)
-                pyautogui.press("enter")
-                safe_sleep(3)
-                pyautogui.click(364,371 ) 
-                safe_sleep(3)
-                pyautogui.hotkey('ctrl','s')
-                safe_sleep(5)
-   
-        except Exception as e:
-            print('ud_Char error:', e)
-
-    def check_popup(self):   
-        
-        screenshot = pyautogui.screenshot()
-        screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
-        image_template = cv2.imread(self.chagelongtextud_icon)
-
-        result = cv2.matchTemplate(screenshot, image_template, cv2.TM_CCOEFF_NORMED)
-        _, max_val, _, _ = cv2.minMaxLoc(result)
-
-        # ถ้ามีความแม่นยำมากกว่า 0.5 (สามารถปรับตัวเลขนี้ได้ตามความต้องการ)
-        if max_val > 0.7:
-            safe_sleep(3)
-            pyautogui.click(267,51)
-            return True
-        else:
-        # ถ้าไม่พบภาพ template ใน screenshot, หยุดการทำงานของ function
-            return False
-        
-        # Function สำหรับ วน loop ขยับแถวลง แล้วทำงาน ตาม Fucntion
-    def process_rows(self, reference_position=(69,178), num_rows=4, col_widths=[50, 120, 122]):
-        self.filt_multi_status()
-        row_height = 20  # ระยะระหว่างแถวใน pixel
-
-        for i in range(num_rows):
-            self.select_ud_row(reference_position, 1, col_widths)  # เลือกแถวที่ i
-            self.ud_step()  # ทำขั้นตอนการอัปเดต
-
-            # อัปเดตตำแหน่งอ้างอิงสำหรับแถวถัดไป
-            reference_position = (reference_position[0], reference_position[1] + row_height)
-
-        return True
-
-        # Function สำหรับ วน loop เลื่อนเก็บ Copy text inslot,Material ,batch ,ud code
+    
     def select_ud_row(self ,reference_position, num_rows, col_widths):
         for i in range(num_rows):
             for j in range(3):
@@ -211,37 +202,30 @@ class SAPLoginBot:
                 elif j == 2:
                     batch = pyperclip.paste()
                     udcode = "A"
-                    safe_sleep(10)
+                    safe_sleep(5)
 
         pyautogui.hotkey("ctrl","shift","f5")
         safe_sleep(3)
         return inslot, material, batch,udcode
-    
-    # Function สำหรับ UD check_statusud >> ud_Char >>check_popup
-    def ud_step(self,plant_code):
+      
+    def process_rows(self,plant_code, num_rows, col_widths=[70, 120, 122]):
         bot_start = datetime.now() 
-        try:
-            status_check = self.check_statusud()
-            if not status_check:
-                print("check_statusud returned False. Stopping ud_step.")
-                return
-            time.sleep(3)
+        self.filt_multi_status()
+        row_height = 20  # pixel distance between rows
 
-            self.ud_Char()
-            time.sleep(3)
+        for i in range(num_rows):
+            inslot, material, batch, udcode = self.select_ud_row(self.reference_position, 1, col_widths)  # select row i
+            safe_sleep(3)
+            self.check_statusud(plant_code)  # Check the status
+          
+
+            # update reference position for next row
+            self.reference_position = (self.reference_position[0], self.reference_position[1] + row_height)
             bot_end = datetime.now()
-
-            # get data from select_ud_row
-            inslot, material, batch, udcode = self.select_ud_row((69,178), 4, [50, 120, 122])
-
-            # Save data to the database using save_bot_data
             self.udbot_data.save_bot_data(bot_start, bot_end, plant_code, material, batch, inslot, udcode)
 
-            self.check_popup()
-            time.sleep(3)
-        except:
-            print('ud_step error')
-     
+        return True
+   
     def close_connection(self):
         try:
             pyautogui.click(791,20)
