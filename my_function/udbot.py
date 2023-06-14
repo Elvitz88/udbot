@@ -45,6 +45,8 @@ class SAPLoginBot:
             pyautogui.moveTo(center_x, center_y)
             pyautogui.doubleClick()
             safe_sleep(5)
+            pyautogui.click(461,476, duration=1)
+            safe_sleep(5)
             screenshot = pyautogui.screenshot()
             screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
             image_template = cv2.imread(self.systemlogin_icon)
@@ -112,6 +114,18 @@ class SAPLoginBot:
             safe_sleep(5)
         except:
             print('information_intlot error')
+            
+    def check_inslot_count(self):
+        try:
+            self.filt_multi_status()
+            safe_sleep(1)
+            pyautogui.rightClick(131, 177, duration=1)
+            pyautogui.click(178, 195, duration=1)
+            inslot = pyperclip.paste()
+            safe_sleep(1)
+            return inslot
+        except:
+            print('check_inslot_count error')
 
     def filt_multi_status(self) : # Filter short text Reject
         try:
@@ -163,7 +177,7 @@ class SAPLoginBot:
     # Function สำหรับ วน loop ขยับแถวลง แล้วทำงาน ตาม Fucntion            
     def check_statusud(self,plant_code):
         pyautogui.click(388,318)
-        safe_sleep(3)
+        safe_sleep(5)
         screenshot = pyautogui.screenshot()
         screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
         image_template = cv2.imread(self.statusud_icon)
@@ -216,13 +230,8 @@ class SAPLoginBot:
         for i in range(num_rows):
             inslot, material, batch, udcode = self.select_ud_row(self.reference_position, 1, col_widths)  # select row i
             safe_sleep(3)
-            
-            # Check if any of inslot, material, or batch is empty
-            if not inslot or not material or not batch:
-                continue  # exit the loop immediately
-
             self.check_statusud(plant_code)  # Check the status
-            
+            safe_sleep(3)
             # update reference position for next row
             self.reference_position = (self.reference_position[0], self.reference_position[1] + row_height)
             bot_end = datetime.now()

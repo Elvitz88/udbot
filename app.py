@@ -1,4 +1,4 @@
-from my_function.udbot_v2 import SAPLoginBot
+from my_function.udbot import SAPLoginBot
 from my_function.udbotdata import UDBotData
 from datetime import datetime
 import time
@@ -48,10 +48,13 @@ def main():
                 # เข้าสู่ QA32 transaction
                 bot.entry_QA32()
                 # กรอกข้อมูล plant code และ inspection type
-                bot.information_intlot(plant_code, instype)  
-                # ประมวลผลแถวข้อมูล
-                bot.process_rows(plant_code,3)
-
+                bot.information_intlot(plant_code, instype)
+                # CheckExite InsLot ตรวจสอบใบงาน Inspection Lot
+                inslot = bot.check_inslot_count()
+                # ตรวจสอบว่า inslot เป็นค่าว่างหรือไม่
+                if not inslot.strip():
+                    continue  # ออกจากลูปเมื่อใบงานเป็นค่าว่าง
+                bot.process_rows(plant_code,2)
             # ปิดการเชื่อมต่อกับ SAP
             bot.close_connection()
         # หยุดเวลา 30 วินาที

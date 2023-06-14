@@ -66,20 +66,23 @@ class Database:
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
 
-    def select_data(self, table, conditions):
+    def get_data(self, plant, bot_start=None, bot_end=None):
         with self.connection.cursor() as cursor:
-            query = sql.SQL(f"SELECT * FROM {table}")
-            if conditions:
-                condition_str = ' AND '.join([
-                    f"date_trunc('hour', {k})::text LIKE %s" if k in ['bot_start', 'bot_end']
-                    else f"{k} = %s"
-                    for k in conditions.keys()
-                ])
-                query = sql.SQL("{} WHERE {}").format(query, sql.SQL(condition_str))
-            cursor.execute(query, [f"%{v}%" for v in conditions.values()])
+            # Define the query
+            query = f"SELECT * FROM ubot_{plant}"
+            
+            # Add the conditions if they are specified
+            if bot_start is not None and bot_end is not None:
+                query += f" WHERE bot_start >= '{bot_start}' AND bot_end <= '{bot_end}'"
+
+            cursor.execute(query)
+
+            # Fetch all the data returned by the database
             rows = cursor.fetchall()
-            count = len(rows)
-            df = pd.DataFrame(rows, columns=[desc[0] for desc in cursor.description])  # สร้าง DataFrame จากแถวที่ได้
+                
+            # Create a dataframe from the rows
+            df = pd.DataFrame(rows, columns=[desc[0] for desc in cursor.description])
+
             return df
             
             
@@ -109,30 +112,3 @@ class Database:
         if self.connection is not None:
             self.connection.close()
             print('Database connection closed.')
-            
-    #### user management functions        
-    def create_users_table(self):
-        command = """
-        CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
-            username VARCHAR(255) NOT NULL,
-            password VARCHAR(255) NOT NULL
-        )
-        """
-        try:
-            with self.connection.cursor() as cursor:
-                cursor.execute(command)
-            print("Users table created successfully")
-        except (Exception, psycopg2.DatabaseError) as error:
-            print("Error creating users table:", error)
-            
-    def get_users(self):
-        query = "SELECT * FROM users"
-        try:
-            with self.connection.cursor() as cursor:
-                cursor.execute(query)
-                rows = cursor.fetchall()
-                return rows
-        except (Exception, psycopg2.DatabaseError) as error:
-            print("Error getting users:", error)
-            
