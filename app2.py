@@ -1,5 +1,5 @@
-from my_function.udbot_v2 import SAPLoginBot
-from my_function.udbotdata import UDBotData
+from my_function.udbot import SAPLoginBot
+from my_function.udbotdata1 import UDBotData1
 from datetime import datetime
 import time
 from configparser import ConfigParser
@@ -31,7 +31,7 @@ def main():
     # เรียกใช้ฟังก์ชันเพื่อรับข้อมูล plant, user, password, email
     plant_user_password_email = get_plant_user_password_email()  
     instypes = ['89']
-    udbot_data = UDBotData()
+    udbot_data = UDBotData1()
 
     # รันโค้ดอย่างต่อเนื่อง
     while True:  
@@ -48,16 +48,17 @@ def main():
                 # เข้าสู่ QA32 transaction
                 bot.entry_QA32()
                 # กรอกข้อมูล plant code และ inspection type
-                bot.information_intlot(plant_code, instype)  
-                # ประมวลผลแถวข้อมูล
-                bot.process_rows()
-                # ดำเนินการ user decision
-                bot.ud_step(plant_code)
-
+                bot.information_intlot(plant_code, instype)
+                # CheckExite InsLot ตรวจสอบใบงาน Inspection Lot
+                inslot = bot.check_inslot_count()
+                # ตรวจสอบว่า inslot เป็นค่าว่างหรือไม่
+                if not inslot.strip():
+                    continue  # ออกจากลูปเมื่อใบงานเป็นค่าว่าง
+                bot.process_rows(plant_code,username,2)
             # ปิดการเชื่อมต่อกับ SAP
             bot.close_connection()
         # หยุดเวลา 30 วินาที
-        time.sleep(30)
+        time.sleep(15)
 
 # รันโค้ดหลัก
 if __name__ == "__main__":

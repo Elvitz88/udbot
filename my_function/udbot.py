@@ -6,7 +6,7 @@ import os
 import json
 import numpy as np
 from datetime import datetime, timedelta
-from my_function.udbotdata import UDBotData
+from my_function.udbotdata1 import UDBotData1
 
 def safe_sleep(duration):
     '''A wrapper function for time.sleep()'''
@@ -15,7 +15,7 @@ def safe_sleep(duration):
 class SAPLoginBot:
     
     def __init__(self):
-        self.udbot_data = UDBotData()
+        self.udbot_data = UDBotData1()
 
         project_dir = os.getcwd()  # หรือกำหนดเส้นทางของโปรเจคโดยตรง
         picture_dir = os.path.join(project_dir, 'documents', 'pictures')  # creates the path to the 'pictures' folder
@@ -142,7 +142,7 @@ class SAPLoginBot:
      
     def ud_Char (self):
         try:
-                pyautogui.click(203,885)
+                pyautogui.click(217,911)
                 safe_sleep(3)
                 pyautogui.write("A")
                 safe_sleep(3)
@@ -168,7 +168,7 @@ class SAPLoginBot:
         # If the accuracy is higher than 0.8 
         if max_val > 0.8:
             safe_sleep(5)
-            pyautogui.click(267, 53, duration=1)
+            pyautogui.click(267,57, duration=1)
             return True
         else:
             # If the template image is not found in the screenshot, stop the function
@@ -193,6 +193,7 @@ class SAPLoginBot:
             pyautogui.moveTo(center_x, center_y)
             pyautogui.click(188,314)
             self.ud_Char()
+            safe_sleep(6)
             self.check_popup()     
         else:
             # ถ้าไม่พบภาพ template ใน screenshot, คลิกที่ตำแหน่งอื่น
@@ -222,7 +223,7 @@ class SAPLoginBot:
         safe_sleep(3)
         return inslot, material, batch,udcode
       
-    def process_rows(self, plant_code, num_rows, col_widths=[70, 120, 122]):
+    def process_rows(self, plant_code,username, num_rows, col_widths=[70, 120, 122]):
         bot_start = datetime.now() 
         self.filt_multi_status()
         row_height = 20  # pixel distance between rows
@@ -235,7 +236,7 @@ class SAPLoginBot:
             # update reference position for next row
             self.reference_position = (self.reference_position[0], self.reference_position[1] + row_height)
             bot_end = datetime.now()
-            self.udbot_data.save_bot_data(bot_start, bot_end, plant_code, material, batch, inslot, udcode)
+            self.udbot_data.save_bot_data(bot_start, bot_end, plant_code, material, batch, inslot, udcode,username)
 
         return True
    
