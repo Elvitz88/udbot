@@ -15,6 +15,7 @@ clone repository ไปยังเครื่องของคุณ
     mkdir documents
         cd documents
         mkdir pictures
+        mkdir datalog
     mkdir my_function
     mkdir mydb
 

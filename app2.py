@@ -54,7 +54,7 @@ def main():
                 # ตรวจสอบว่า inslot เป็นค่าว่างหรือไม่
                 if not inslot.strip():
                     continue  # ออกจากลูปเมื่อใบงานเป็นค่าว่าง
-                bot.process_rows(plant_code,username,2)
+                bot.process_rows(plant_code,username,3)
             # ปิดการเชื่อมต่อกับ SAP
             bot.close_connection()
         # หยุดเวลา 30 วินาที

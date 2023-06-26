@@ -21,13 +21,14 @@ class SAPLoginBot:
         picture_dir = os.path.join(project_dir, 'documents', 'pictures')  # creates the path to the 'pictures' folder
 
         self.sap_icon_logo = os.path.join(picture_dir, 'saplogo.png')
-        self.systemlogin_icon = os.path.join(picture_dir, 'Systemlogin.png')
-        self.statusud_icon = os.path.join(picture_dir, 'StatusUD.png')
+        self.systemlogin_icon = os.path.join(picture_dir, 'SystemloginQAS1.png')
+        self.taboperation_icon = os.path.join(picture_dir, 'taboperation.png')
+        self.statusud_icon = os.path.join(picture_dir, 'StatusUDQAS.png')
         self.changelongtextud_icon = os.path.join(picture_dir, 'changelongtextUD1.png')
         
 
-        self.username_field_location = (218, 205)
-        self.password_field_location = (205, 228)
+        self.username_field_location = (302,203)
+        self.password_field_location = (306,225)
         self.reference_position = (28, 182)
         
         # self.login_button_location = (600, 600)
@@ -142,7 +143,7 @@ class SAPLoginBot:
      
     def ud_Char (self):
         try:
-                pyautogui.click(217,911)
+                pyautogui.click(216,908)
                 safe_sleep(3)
                 pyautogui.write("A")
                 safe_sleep(3)
@@ -168,7 +169,7 @@ class SAPLoginBot:
         # If the accuracy is higher than 0.8 
         if max_val > 0.8:
             safe_sleep(5)
-            pyautogui.click(267,57, duration=1)
+            pyautogui.click(267, 53, duration=1)
             return True
         else:
             # If the template image is not found in the screenshot, stop the function
@@ -176,7 +177,22 @@ class SAPLoginBot:
         
     # Function สำหรับ วน loop ขยับแถวลง แล้วทำงาน ตาม Fucntion            
     def check_statusud(self,plant_code):
-        pyautogui.click(388,318)
+        safe_sleep(3)
+        #เลื่อน Click Taboperation compleate
+        screenshot = pyautogui.screenshot()
+        screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+        image_template = cv2.imread(self.taboperation_icon) 
+        result = cv2.matchTemplate(screenshot, image_template, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, max_loc = cv2.minMaxLoc(result)
+        # ถ้ามีความแม่นยำมากกว่า 0.10 (สามารถปรับตัวเลขนี้ได้ตามความต้องการ)
+        if max_val > 0.8:
+            image_height, image_width, _ = image_template.shape
+            center_x = max_loc[0] + image_width // 2
+            center_y = max_loc[1] + image_height // 2
+            safe_sleep(6)
+            pyautogui.moveTo(center_x, center_y)
+            pyautogui.click()
+        #Check status UD "A" Only
         safe_sleep(5)
         screenshot = pyautogui.screenshot()
         screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
@@ -193,7 +209,6 @@ class SAPLoginBot:
             pyautogui.moveTo(center_x, center_y)
             pyautogui.click(188,314)
             self.ud_Char()
-            safe_sleep(6)
             self.check_popup()     
         else:
             # ถ้าไม่พบภาพ template ใน screenshot, คลิกที่ตำแหน่งอื่น
